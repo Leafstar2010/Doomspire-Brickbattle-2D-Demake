@@ -1,0 +1,28 @@
+# PC build. Requires gcc + SDL2.
+
+CC      = gcc
+CFLAGS  = -std=c11 -O2 -Wall -Wextra -I.. $(shell sdl2-config --cflags)
+LDFLAGS = $(shell sdl2-config --libs) -lm
+
+SRC = ../main.c ../physics.c platform_win.c
+OUT = ../../windows/tower.exe
+
+ASSETS_SRC = ../../assets
+ASSETS_DST = ../../windows/assets
+
+.PHONY: all clean copy_assets
+
+all: $(OUT) copy_assets
+
+$(OUT): $(SRC)
+	@mkdir -p $(dir $(OUT))
+	$(CC) $(CFLAGS) $(SRC) -o $(OUT) $(LDFLAGS)
+
+copy_assets:
+	@mkdir -p $(ASSETS_DST)
+	@cp -r $(ASSETS_SRC)/. $(ASSETS_DST)/
+
+clean:
+	rm -f $(OUT)
+	rm -rf $(ASSETS_DST)
+	-rmdir ../../windows 2>/dev/null || true

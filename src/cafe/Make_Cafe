@@ -1,0 +1,68 @@
+# Wii U build. Requires devkitPro + WUT + wiiu-sdl2.
+# Pass NOMAP=1 to compile without map loading (uses hardcoded arena).
+
+WUT_RULES := $(DEVKITPRO)/wut/share/wut_rules
+
+ifeq ($(wildcard $(WUT_RULES)),)
+
+.PHONY: all clean
+
+all:
+	@echo "devkitPro WUT not found at $(WUT_RULES)."
+	@echo "Open a devkitPro MSYS shell, then retry."
+	@exit 1
+
+clean:
+	@rm -rf ../../wiiu
+
+else
+
+include $(WUT_RULES)
+
+TARGET   := tower
+BUILD    := ../../wiiu
+SOURCES  := .. .
+INCLUDES := .. $(PORTLIBS)/include $(DEVKITPRO)/wut/include
+
+CFLAGS   += -std=c11 -O2 -Wall -Wextra -g
+LIBS     := -lSDL2 -lwut -lm
+
+ifdef NOMAP
+CFLAGS += -DNOMAP
+endif
+export NOMAP
+
+ifneq ($(BUILD),$(notdir $(CURDIR)))
+
+export OUTPUT   := $(CURDIR)/$(TARGET)
+export VPATH    := $(foreach dir,$(SOURCES),$(CURDIR)/$(dir))
+export DEPSDIR  := $(CURDIR)/$(BUILD)
+
+CFILES  := $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+export OFILES := $(CFILES:.c=.o)
+
+export INCLUDE := $(foreach dir,$(INCLUDES),-I$(dir))
+
+.PHONY: all clean
+
+all: $(BUILD)
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Make_Cafe
+
+$(BUILD):
+	@mkdir -p $@
+
+clean:
+	@rm -rf $(BUILD)
+
+else
+
+$(OUTPUT).elf: $(OFILES)
+	$(CC) $(LDFLAGS) $(OFILES) $(LIBS) -o $@
+	$(ELF2RPX) $@ $(OUTPUT).rpx
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+endif
+
+endif
