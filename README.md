@@ -2,7 +2,7 @@
 A 2D game inspired by Doomspire Brickbattle on Roblox
 Made for the Nintendo Wii U
 --------------------------------------------------------------
-**DISCLAIMER**
+DISCLAIMER
 Although I hate to admit it,
 This project utilizes generative AI in the modification and creation of scripts.
 I hate AI as much as the next person, but Id rather just get something made then get a headache.
